@@ -1,0 +1,47 @@
+{
+  "name": "claude-code-council",
+  "description": "AI Code Review Council - Evidence-weighted multi-agent code review with streaming progress, parallel execution, custom agent templates, and comprehensive refactoring planning for Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dima"
+  },
+  "homepage": "https://github.com/646826/claude-code-council",
+  "repository": "https://github.com/646826/claude-code-council",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "multi-agent",
+    "architecture",
+    "security",
+    "quality",
+    "dry-principle",
+    "api-governance",
+    "refactoring",
+    "complexity-analysis"
+  ],
+  "agents": [
+    "./agents/reuse-hunter.md",
+    "./agents/security-guardian.md",
+    "./agents/api-sentinel.md",
+    "./agents/evolution-guardian.md",
+    "./agents/synthesizer.md",
+    "./agents/refactoring/architecture-analyst.md",
+    "./agents/refactoring/dependency-mapper.md",
+    "./agents/refactoring/risk-assessor.md",
+    "./agents/refactoring/ux-continuity-guardian.md",
+    "./agents/refactoring/complexity-analyzer.md"
+  ],
+  "commands": [
+    "./commands/council.md",
+    "./commands/council-architectural.md",
+    "./commands/council-feature.md",
+    "./commands/council-trivial.md",
+    "./commands/council-config.md",
+    "./commands/council-dashboard.md",
+    "./commands/council-history.md",
+    "./commands/council-agent-create.md",
+    "./commands/council-agent-config.md",
+    "./commands/council-refactor-plan.md"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

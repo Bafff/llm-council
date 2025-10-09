@@ -1,0 +1,33 @@
+{
+  "PostToolUse": [
+    {
+      "matcher": "Write",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "A new file was just created. Consider running a quick AI Council security check if this file contains code (not documentation). Use /council-trivial for a fast 30-second security and duplication review."
+        }
+      ]
+    },
+    {
+      "matcher": "Edit",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Code was just modified. If this was a significant change (>50 lines or security-sensitive), consider running /council to ensure quality and security standards are met."
+        }
+      ]
+    }
+  ],
+  "UserPromptSubmit": [
+    {
+      "matcher": "commit|push",
+      "hooks": [
+        {
+          "type": "prompt",
+          "prompt": "Before committing, consider running AI Council review on your changes:\n- /council-trivial for small changes (<100 LOC)\n- /council-feature for new features (100-500 LOC)\n- /council-architectural for major refactoring (>500 LOC)\n\nThis helps catch issues before they're committed."
+        }
+      ]
+    }
+  ]
+}
