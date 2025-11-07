@@ -5,7 +5,7 @@ import time
 from typing import Optional
 from anthropic import Anthropic, AsyncAnthropic
 
-from .base import BaseLLMAdapter, LLMResponse, AuthMethod
+from llm_council.adapters.base import BaseLLMAdapter, LLMResponse, AuthMethod
 
 
 class ClaudeAdapter(BaseLLMAdapter):

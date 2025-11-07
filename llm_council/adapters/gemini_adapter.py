@@ -5,7 +5,7 @@ import time
 from typing import Optional
 import google.generativeai as genai
 
-from .base import BaseLLMAdapter, LLMResponse, AuthMethod
+from llm_council.adapters.base import BaseLLMAdapter, LLMResponse, AuthMethod
 
 
 class GeminiAdapter(BaseLLMAdapter):

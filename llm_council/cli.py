@@ -14,7 +14,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from core.council import LLMCouncil
+from llm_council.core.council import LLMCouncil
 
 app = typer.Typer(
     name="llm-council",
@@ -185,9 +185,19 @@ def setup():
 @app.command()
 def version():
     """Show version information"""
-    console.print("[cyan]LLM Council v1.0.0[/cyan]")
+    from pathlib import Path
+
+    # Read version from VERSION file
+    version_file = Path(__file__).parent / "VERSION"
+    if version_file.exists():
+        version_str = version_file.read_text().strip()
+    else:
+        version_str = "1.0.0"
+
+    console.print(f"[cyan]LLM Council v{version_str}[/cyan]")
     console.print("Multi-model AI consensus system")
     console.print("\nBuilt on concepts from claude-code-council")
+    console.print(f"\n[dim]See CHANGELOG.md for version history[/dim]")
 
 
 # Default command (when no subcommand specified)
@@ -211,5 +221,10 @@ def main(
             console.print(ctx.get_help())
 
 
+def main():
+    """Entry point for pipx installation"""
+    main()
+
+
 if __name__ == "__main__":
-    app()
+    main()
