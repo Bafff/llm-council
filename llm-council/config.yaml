@@ -1,0 +1,68 @@
+# LLM Council Configuration
+
+# Models to use (enable/disable each)
+models:
+  claude:
+    enabled: true
+    adapter: claude
+    display_name: "Claude Sonnet 4.5"
+    weight: 1.2  # Higher weight for consensus
+
+  gemini:
+    enabled: true
+    adapter: gemini
+    display_name: "Gemini 2.0 Flash"
+    weight: 1.0
+
+  gpt4:
+    enabled: true
+    adapter: openrouter
+    model_id: "openai/gpt-4-turbo"
+    display_name: "GPT-4 Turbo"
+    weight: 1.1
+
+  grok:
+    enabled: true
+    adapter: openrouter
+    model_id: "x-ai/grok-beta"
+    display_name: "Grok Beta"
+    weight: 1.0
+
+# Authentication methods (prioritized top to bottom)
+auth:
+  # Method 1: Environment variables (recommended for MVP)
+  env_vars:
+    anthropic_api_key: ANTHROPIC_API_KEY
+    google_api_key: GOOGLE_API_KEY  # Free from ai.google.dev
+    openrouter_api_key: OPENROUTER_API_KEY
+    openai_api_key: OPENAI_API_KEY
+
+  # Method 2: Browser cookies (for free usage - to implement later)
+  browser_cookies:
+    enabled: false
+    claude_cookie_file: ~/.config/llm-council/claude_cookies.json
+    chatgpt_cookie_file: ~/.config/llm-council/openai_cookies.json
+
+  # Method 3: Claude Code session (advanced - to implement)
+  claude_code_session:
+    enabled: false
+    use_active_session: true
+
+# Synthesis settings
+synthesis:
+  method: weighted_consensus  # Options: weighted_consensus, majority_vote, debate
+
+  # Consensus thresholds
+  strong_consensus: 0.8  # 80% agreement
+  weak_consensus: 0.6    # 60% agreement
+
+  # Conflict resolution
+  max_debate_rounds: 2
+  enable_meta_analysis: true  # Use Claude to analyze disagreements
+
+# Output preferences
+output:
+  show_individual_responses: true
+  show_confidence_scores: true
+  show_synthesis_reasoning: true
+  format: rich  # Options: rich, plain, json

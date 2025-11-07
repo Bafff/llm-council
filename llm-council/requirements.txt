@@ -1,0 +1,20 @@
+# LLM Council - Multi-Model AI Consensus System
+# Python 3.9+
+
+# Core LLM SDKs
+anthropic>=0.34.0          # Claude API
+google-generativeai>=0.3.0 # Gemini Free API
+openai>=1.0.0              # OpenAI & OpenRouter
+
+# CLI & UI
+rich>=13.0.0               # Beautiful CLI
+typer>=0.9.0               # CLI framework
+pyyaml>=6.0                # Config parsing
+
+# Async & HTTP
+httpx>=0.24.0              # Async HTTP
+aiohttp>=3.9.0             # Alternative HTTP
+
+# Utils
+python-dotenv>=1.0.0       # Env var management
+tenacity>=8.2.0            # Retry logic
