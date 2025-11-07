@@ -3,7 +3,7 @@
 import os
 import time
 from typing import Optional
-import google.generativeai as genai
+from google import genai
 
 from .base import BaseLLMAdapter, LLMResponse, AuthMethod
 
@@ -15,10 +15,11 @@ class GeminiAdapter(BaseLLMAdapter):
         super().__init__(config)
         self.client = None
         self.api_key: Optional[str] = None
-        self.model_id = "gemini-2.0-flash-exp"  # Latest free model
+        # Use latest Gemini 2.5 Flash (newest model as of 2025)
+        self.model_id = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
 
     def authenticate(self, method: AuthMethod = AuthMethod.API_KEY) -> bool:
-        """Authenticate with Gemini"""
+        """Authenticate with Gemini using new SDK"""
         if method == AuthMethod.API_KEY:
             # Try environment variable
             self.api_key = os.getenv('GOOGLE_API_KEY')
@@ -29,8 +30,8 @@ class GeminiAdapter(BaseLLMAdapter):
                 return False
 
             try:
-                genai.configure(api_key=self.api_key)
-                self.client = genai.GenerativeModel(self.model_id)
+                # Use new Gemini SDK (from google import genai)
+                self.client = genai.Client(api_key=self.api_key)
                 return True
             except Exception as e:
                 print(f"❌ {self.model_name}: Auth failed - {e}")
@@ -39,7 +40,7 @@ class GeminiAdapter(BaseLLMAdapter):
         return False
 
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
-        """Query Gemini"""
+        """Query Gemini using new SDK"""
         if not self.client:
             if not self.authenticate():
                 return LLMResponse(
@@ -51,15 +52,12 @@ class GeminiAdapter(BaseLLMAdapter):
         start_time = time.time()
 
         try:
-            # Gemini's generate_content is sync, wrap in async
+            # New Gemini SDK: client.models.generate_content()
             import asyncio
             response = await asyncio.to_thread(
-                self.client.generate_content,
-                prompt,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=kwargs.get('temperature', 0.7),
-                    max_output_tokens=kwargs.get('max_tokens', 4096),
-                )
+                self.client.models.generate_content,
+                model=self.model_id,
+                contents=prompt
             )
 
             latency = (time.time() - start_time) * 1000
@@ -67,11 +65,11 @@ class GeminiAdapter(BaseLLMAdapter):
             # Extract text from response
             content = response.text if hasattr(response, 'text') else str(response)
 
-            # Estimate tokens (Gemini doesn't always return exact count)
+            # Get token usage if available
             tokens = getattr(response, 'usage_metadata', None)
             token_count = None
             if tokens:
-                token_count = tokens.prompt_token_count + tokens.candidates_token_count
+                token_count = getattr(tokens, 'total_token_count', None)
 
             return LLMResponse(
                 model_name=self.model_name,

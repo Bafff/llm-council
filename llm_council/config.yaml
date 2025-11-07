@@ -11,7 +11,7 @@ models:
   gemini:
     enabled: true
     adapter: gemini
-    display_name: "Gemini 2.0 Flash"
+    display_name: "Gemini 2.5 Flash"
     weight: 1.0
 
   gpt4:
