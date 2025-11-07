@@ -14,7 +14,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from llm_council.core.council import LLMCouncil
+from core.council import LLMCouncil
 
 app = typer.Typer(
     name="llm-council",
@@ -201,7 +201,7 @@ def version():
 
 
 # Default command (when no subcommand specified)
-@app.callback(invoke_without_command=True)
+# @app.callback(invoke_without_command=True) # TEMPORARILY DISABLED FOR TESTING
 def main(
     ctx: typer.Context,
     prompt: str = typer.Argument(None, help="Question to ask (shorthand for 'ask' command)")
@@ -223,7 +223,7 @@ def main(
 
 def main():
     """Entry point for pipx installation"""
-    main()
+    app()
 
 
 if __name__ == "__main__":

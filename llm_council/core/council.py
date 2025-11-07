@@ -7,8 +7,8 @@ from typing import List, Dict, Optional
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
-from llm_council.adapters import ClaudeAdapter, GeminiAdapter, OpenRouterAdapter, BaseLLMAdapter
-from llm_council.core.synthesizer import ConsensusSynthesizer, SynthesisResult
+from adapters import ClaudeAdapter, GeminiAdapter, OpenRouterAdapter, BaseLLMAdapter
+from .synthesizer import ConsensusSynthesizer, SynthesisResult
 
 
 class LLMCouncil:
