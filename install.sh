@@ -22,7 +22,13 @@ fi
 # Install LLM Council
 echo "⚡ Installing LLM Council..."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-pipx install -e "$SCRIPT_DIR/llm_council"
+
+if pipx list --short | grep -q "^llm-council"; then
+    echo "🔁 LLM Council already installed via pipx – refreshing installation with --force"
+    pipx install -e "$SCRIPT_DIR/llm_council" --force
+else
+    pipx install -e "$SCRIPT_DIR/llm_council"
+fi
 
 echo ""
 echo "✅ Installation complete!"
