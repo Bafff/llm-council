@@ -48,6 +48,8 @@ class OpenRouterAdapter(BaseLLMAdapter):
                 self.api_key = session.api_key or session.token
                 base_url = "https://api.openai.com/v1"
                 self.client = AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+                self.auth_method_used = "CLI Session"
+                self.auth_source = "ChatGPT CLI (sgpt)"
                 print(f"✅ {self.model_name}: Authenticated via ChatGPT CLI")
                 return True
 
@@ -57,6 +59,8 @@ class OpenRouterAdapter(BaseLLMAdapter):
                 self.api_key = session.api_key
                 base_url = "https://api.openai.com/v1"
                 self.client = AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+                self.auth_method_used = "CLI Session"
+                self.auth_source = "OpenAI CLI"
                 print(f"✅ {self.model_name}: Authenticated via OpenAI CLI")
                 return True
 
@@ -79,13 +83,18 @@ class OpenRouterAdapter(BaseLLMAdapter):
         try:
             # OpenRouter uses OpenAI-compatible API
             base_url = "https://openrouter.ai/api/v1"
+            auth_source = "OPENROUTER_API_KEY env var"
+
             if 'OPENAI_API_KEY' in os.environ and 'OPENROUTER_API_KEY' not in os.environ:
                 base_url = "https://api.openai.com/v1"
+                auth_source = "OPENAI_API_KEY env var"
 
             self.client = AsyncOpenAI(
                 api_key=self.api_key,
                 base_url=base_url
             )
+            self.auth_method_used = "API Key"
+            self.auth_source = auth_source
             print(f"✅ {self.model_name}: Authenticated via API key")
             return True
         except Exception as e:
@@ -123,7 +132,9 @@ class OpenRouterAdapter(BaseLLMAdapter):
                 confidence=0.88,
                 tokens_used=completion.usage.total_tokens if completion.usage else None,
                 latency_ms=latency,
-                raw_response=completion.model_dump()
+                raw_response=completion.model_dump(),
+                auth_method=self.auth_method_used,
+                auth_source=self.auth_source
             )
 
         except Exception as e:

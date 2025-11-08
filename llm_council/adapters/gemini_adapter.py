@@ -47,6 +47,8 @@ class GeminiAdapter(BaseLLMAdapter):
             session = self.cli_session_manager.get_session(CLIProvider.GEMINI)
             if session.is_authenticated and session.api_key:
                 self.api_key = session.api_key
+                self.auth_method_used = "CLI Session"
+                self.auth_source = "Gemini CLI"
                 print(f"✅ {self.model_name}: Authenticated via Gemini CLI")
                 return True
 
@@ -54,6 +56,8 @@ class GeminiAdapter(BaseLLMAdapter):
             session = self.cli_session_manager.get_session(CLIProvider.GOOGLE_AI)
             if session.is_authenticated and (session.token or session.api_key):
                 self.api_key = session.token or session.api_key
+                self.auth_method_used = "CLI Session"
+                self.auth_source = "gcloud CLI"
                 print(f"✅ {self.model_name}: Authenticated via gcloud CLI")
                 return True
 
@@ -71,6 +75,8 @@ class GeminiAdapter(BaseLLMAdapter):
             print("   Get FREE key at: https://ai.google.dev/")
             return False
 
+        self.auth_method_used = "API Key"
+        self.auth_source = "GOOGLE_API_KEY env var"
         print(f"✅ {self.model_name}: Authenticated via API key")
         return True
 
@@ -127,7 +133,9 @@ class GeminiAdapter(BaseLLMAdapter):
                 confidence=0.85,
                 tokens_used=token_count,
                 latency_ms=latency,
-                raw_response=data
+                raw_response=data,
+                auth_method=self.auth_method_used,
+                auth_source=self.auth_source
             )
 
         except httpx.HTTPStatusError as e:

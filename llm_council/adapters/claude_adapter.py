@@ -56,6 +56,8 @@ class ClaudeAdapter(BaseLLMAdapter):
                 self.api_key = session.token or session.api_key
                 if self.api_key:
                     self.client = AsyncAnthropic(api_key=self.api_key)
+                    self.auth_method_used = "CLI Session"
+                    self.auth_source = "Claude Code CLI"
                     print(f"✅ {self.model_name}: Authenticated via Claude Code CLI")
                     return True
 
@@ -64,6 +66,8 @@ class ClaudeAdapter(BaseLLMAdapter):
             if session.is_authenticated and session.api_key:
                 self.api_key = session.api_key
                 self.client = AsyncAnthropic(api_key=self.api_key)
+                self.auth_method_used = "CLI Session"
+                self.auth_source = "Anthropic CLI"
                 print(f"✅ {self.model_name}: Authenticated via Anthropic CLI")
                 return True
 
@@ -82,6 +86,8 @@ class ClaudeAdapter(BaseLLMAdapter):
 
         try:
             self.client = AsyncAnthropic(api_key=self.api_key)
+            self.auth_method_used = "API Key"
+            self.auth_source = "ANTHROPIC_API_KEY env var"
             print(f"✅ {self.model_name}: Authenticated via API key")
             return True
         except Exception as e:
@@ -119,7 +125,9 @@ class ClaudeAdapter(BaseLLMAdapter):
                 confidence=0.9,  # Claude typically high quality
                 tokens_used=message.usage.input_tokens + message.usage.output_tokens,
                 latency_ms=latency,
-                raw_response=message.model_dump()
+                raw_response=message.model_dump(),
+                auth_method=self.auth_method_used,
+                auth_source=self.auth_source
             )
 
         except Exception as e:

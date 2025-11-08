@@ -215,10 +215,18 @@ class LLMCouncil:
             self.console.print("\n[bold]📋 Individual Responses:[/bold]\n")
 
             for resp in result.individual_responses:
+                # Build title with auth info if available
+                title = f"{resp['model']} (confidence: {resp['confidence']:.0%}, weight: {resp['weight']})"
+
+                # Add auth method info if available
+                if resp.get('auth_method') and resp.get('auth_source'):
+                    auth_emoji = "🔑" if resp['auth_method'] == "API Key" else "🔐"
+                    title += f"\n{auth_emoji} Auth: {resp['auth_method']} ({resp['auth_source']})"
+
                 self.console.print(
                     Panel(
                         resp['content'][:500] + ("..." if len(resp['content']) > 500 else ""),
-                        title=f"{resp['model']} (confidence: {resp['confidence']:.0%}, weight: {resp['weight']})",
+                        title=title,
                         border_style="blue"
                     )
                 )

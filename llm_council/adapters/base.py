@@ -25,6 +25,8 @@ class LLMResponse:
     latency_ms: Optional[float] = None
     raw_response: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
+    auth_method: Optional[str] = None  # Authentication method used (e.g., "CLI Session", "API Key")
+    auth_source: Optional[str] = None  # Specific auth source (e.g., "Claude Code CLI", "ANTHROPIC_API_KEY")
 
     @property
     def success(self) -> bool:
@@ -39,6 +41,8 @@ class BaseLLMAdapter(ABC):
         self.model_name = config.get('display_name', 'Unknown Model')
         self.weight = config.get('weight', 1.0)
         self.enabled = config.get('enabled', True)
+        self.auth_method_used: Optional[str] = None  # Track which auth method was used
+        self.auth_source: Optional[str] = None  # Track specific auth source
 
     @abstractmethod
     async def query(self, prompt: str, **kwargs) -> LLMResponse:

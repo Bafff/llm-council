@@ -91,7 +91,9 @@ class ConsensusSynthesizer:
                     'model': r['adapter'].model_name,
                     'content': r['response'].content,
                     'confidence': r['response'].confidence,
-                    'weight': r['adapter'].weight
+                    'weight': r['adapter'].weight,
+                    'auth_method': r['response'].auth_method,
+                    'auth_source': r['response'].auth_source
                 }
                 for r in valid_responses
             ],
