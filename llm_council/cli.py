@@ -9,12 +9,15 @@ Usage:
 """
 
 import asyncio
-import typer
+import sys
 from pathlib import Path
+from typing import Optional, Sequence
+
+import typer
 from rich.console import Console
 from rich.table import Table
 
-from core.council import LLMCouncil
+from llm_council.core.council import LLMCouncil
 
 app = typer.Typer(
     name="llm-council",
@@ -201,29 +204,37 @@ def version():
 
 
 # Default command (when no subcommand specified)
-# @app.callback(invoke_without_command=True) # TEMPORARILY DISABLED FOR TESTING
-def main(
-    ctx: typer.Context,
-    prompt: str = typer.Argument(None, help="Question to ask (shorthand for 'ask' command)")
-):
-    """
-    🤖 LLM Council - Get consensus answers from multiple AI models
 
-    Ask a question to multiple LLMs and get a synthesized consensus answer.
-    """
+
+@app.callback(invoke_without_command=True)
+def _root_command(ctx: typer.Context):
+    """Show help when no command or prompt is provided."""
 
     if ctx.invoked_subcommand is None:
-        if prompt:
-            # Shorthand: llm-council "question"
-            ctx.invoke(ask, prompt=prompt)
-        else:
-            # Show help
-            console.print(ctx.get_help())
+        console.print(ctx.get_help())
 
 
-def main():
-    """Entry point for pipx installation"""
-    app()
+def _command_names() -> set[str]:
+    """Return the registered command names, including Typer defaults."""
+
+    names: set[str] = set()
+    for command in app.registered_commands:
+        raw_name = command.name or command.callback.__name__
+        # Typer converts underscores to hyphens in CLI command names by default.
+        names.add(raw_name.replace("_", "-"))
+    return names
+
+
+def main(argv: Optional[Sequence[str]] = None):
+    """Entry point for pipx installation."""
+
+    args = list(argv if argv is not None else sys.argv[1:])
+    command_names = _command_names()
+
+    if args and not args[0].startswith("-") and args[0] not in command_names:
+        return app(args=["ask", *args])
+
+    return app(args=args)
 
 
 if __name__ == "__main__":

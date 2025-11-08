@@ -195,7 +195,7 @@ python cli.py ask "question" --config my_config.yaml
 ### Integration with Other Scripts
 
 ```python
-from core.council import LLMCouncil
+from llm_council.core.council import LLMCouncil
 import asyncio
 
 async def main():

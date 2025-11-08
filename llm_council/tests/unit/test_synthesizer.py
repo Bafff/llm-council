@@ -1,14 +1,9 @@
 """Unit tests for ConsensusSynthesizer"""
 
 import pytest
-import sys
-from pathlib import Path
 
-# Add parent directories to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from core.synthesizer import ConsensusSynthesizer, ConsensusLevel
-from adapters.base import LLMResponse
+from llm_council.adapters.base import LLMResponse
+from llm_council.core.synthesizer import ConsensusLevel, ConsensusSynthesizer
 
 
 class TestConsensusSynthesizer:

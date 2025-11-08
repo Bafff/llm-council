@@ -76,15 +76,12 @@ Issues = "https://github.com/Bafff/claude-code-council/issues"
 Documentation = "https://github.com/Bafff/claude-code-council/tree/main/llm-council"
 
 [project.scripts]
-llm-council = "cli:main"
-council = "cli:main"
-
-[tool.setuptools]
-py-modules = ["cli", "config"]
+llm-council = "llm_council.cli:main"
+council = "llm_council.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["adapters*", "core*", "interfaces*"]
+include = ["llm_council*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.yml", "*.md"]
@@ -130,6 +127,9 @@ addopts = [
     "--cov-report=html",
 ]
 asyncio_mode = "auto"
+markers = [
+    "integration: slow(er) integration scenarios that exercise the CLI entry points",
+]
 
 # MyPy type checker
 [tool.mypy]

@@ -7,7 +7,13 @@ from typing import List, Dict, Optional
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
-from adapters import ClaudeAdapter, GeminiAdapter, OpenRouterAdapter, BaseLLMAdapter
+from llm_council.adapters import (
+    BaseLLMAdapter,
+    ClaudeAdapter,
+    GeminiAdapter,
+    OpenRouterAdapter,
+)
+
 from .synthesizer import ConsensusSynthesizer, SynthesisResult
 
 
