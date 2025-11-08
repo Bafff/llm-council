@@ -26,6 +26,9 @@ class ClaudeAdapter(BaseLLMAdapter):
 
         Tries CLI authentication first (if enabled), falls back to API key.
         """
+        if not self.use_cli_auth and method == AuthMethod.CLI_SESSION:
+            method = AuthMethod.API_KEY
+
         # Try CLI session authentication first (if enabled)
         if self.use_cli_auth and method == AuthMethod.CLI_SESSION:
             if self._authenticate_via_cli():

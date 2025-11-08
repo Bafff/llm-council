@@ -27,6 +27,9 @@ class OpenRouterAdapter(BaseLLMAdapter):
 
         Tries CLI authentication first (if enabled), falls back to API key.
         """
+        if not self.use_cli_auth and method == AuthMethod.CLI_SESSION:
+            method = AuthMethod.API_KEY
+
         # Try CLI session authentication first (if enabled)
         if self.use_cli_auth and method == AuthMethod.CLI_SESSION:
             if self._authenticate_via_cli():
@@ -46,24 +49,34 @@ class OpenRouterAdapter(BaseLLMAdapter):
             # Try ChatGPT CLI
             session = self.cli_session_manager.get_session(CLIProvider.CHATGPT)
             if session.is_authenticated and (session.api_key or session.token):
-                self.api_key = session.api_key or session.token
-                self.base_url = "https://api.openai.com/v1"
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
-                self.auth_method_used = "CLI Session"
-                self.auth_source = "ChatGPT CLI (sgpt)"
-                print(f"✅ {self.model_name}: Authenticated via ChatGPT CLI")
-                return True
+                if not self._is_model_supported_by_openai():
+                    print(
+                        f"⚠️  {self.model_name}: Model '{self.model_id}' is not available via OpenAI CLI auth"
+                    )
+                else:
+                    self.api_key = session.api_key or session.token
+                    self.base_url = "https://api.openai.com/v1"
+                    self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+                    self.auth_method_used = "CLI Session"
+                    self.auth_source = "ChatGPT CLI (sgpt)"
+                    print(f"✅ {self.model_name}: Authenticated via ChatGPT CLI")
+                    return True
 
             # Try OpenAI CLI
             session = self.cli_session_manager.get_session(CLIProvider.OPENAI)
             if session.is_authenticated and session.api_key:
-                self.api_key = session.api_key
-                self.base_url = "https://api.openai.com/v1"
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
-                self.auth_method_used = "CLI Session"
-                self.auth_source = "OpenAI CLI"
-                print(f"✅ {self.model_name}: Authenticated via OpenAI CLI")
-                return True
+                if not self._is_model_supported_by_openai():
+                    print(
+                        f"⚠️  {self.model_name}: Model '{self.model_id}' is not available via OpenAI CLI auth"
+                    )
+                else:
+                    self.api_key = session.api_key
+                    self.base_url = "https://api.openai.com/v1"
+                    self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
+                    self.auth_method_used = "CLI Session"
+                    self.auth_source = "OpenAI CLI"
+                    print(f"✅ {self.model_name}: Authenticated via OpenAI CLI")
+                    return True
 
         except Exception as e:
             print(f"⚠️  {self.model_name}: CLI auth failed - {e}")
@@ -117,11 +130,22 @@ class OpenRouterAdapter(BaseLLMAdapter):
             if '/' in self.model_id:
                 # Extract model name after the prefix (e.g., "openai/gpt-4-turbo" -> "gpt-4-turbo")
                 vendor, model = self.model_id.split('/', 1)
+                if vendor != "openai":
+                    raise ValueError(
+                        f"Model '{self.model_id}' is not supported by the OpenAI API base URL"
+                    )
                 return model
             return self.model_id
         else:
             # Using OpenRouter - keep vendor prefix
             return self.model_id
+
+    def _is_model_supported_by_openai(self) -> bool:
+        """Return True if the configured model can be used with OpenAI's API."""
+        if '/' not in self.model_id:
+            return True
+        vendor, _ = self.model_id.split('/', 1)
+        return vendor == "openai"
 
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
         """Query OpenRouter model"""
