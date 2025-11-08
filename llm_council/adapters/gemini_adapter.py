@@ -15,6 +15,7 @@ class GeminiAdapter(BaseLLMAdapter):
     def __init__(self, config: dict):
         super().__init__(config)
         self.api_key: Optional[str] = None
+        self.bearer_token: Optional[str] = None  # For gcloud OAuth tokens
         # Use latest Gemini 2.5 Flash (newest model as of 2025)
         self.model_id = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
@@ -55,10 +56,17 @@ class GeminiAdapter(BaseLLMAdapter):
             # Try Google Cloud CLI (gcloud)
             session = self.cli_session_manager.get_session(CLIProvider.GOOGLE_AI)
             if session.is_authenticated and (session.token or session.api_key):
-                self.api_key = session.token or session.api_key
-                self.auth_method_used = "CLI Session"
-                self.auth_source = "gcloud CLI"
-                print(f"✅ {self.model_name}: Authenticated via gcloud CLI")
+                # gcloud returns bearer tokens (OAuth), not API keys
+                if session.token:
+                    self.bearer_token = session.token
+                    self.auth_method_used = "CLI Session"
+                    self.auth_source = "gcloud CLI (OAuth Bearer Token)"
+                    print(f"✅ {self.model_name}: Authenticated via gcloud CLI (OAuth)")
+                else:
+                    self.api_key = session.api_key
+                    self.auth_method_used = "CLI Session"
+                    self.auth_source = "gcloud CLI"
+                    print(f"✅ {self.model_name}: Authenticated via gcloud CLI")
                 return True
 
         except Exception as e:
@@ -82,7 +90,7 @@ class GeminiAdapter(BaseLLMAdapter):
 
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
         """Query Gemini using direct REST API"""
-        if not self.api_key:
+        if not self.api_key and not self.bearer_token:
             if not self.authenticate():
                 return LLMResponse(
                     model_name=self.model_name,
@@ -104,13 +112,26 @@ class GeminiAdapter(BaseLLMAdapter):
                 }]
             }
 
+            # Build headers based on auth type
+            headers = {'Content-Type': 'application/json'}
+
+            if self.bearer_token:
+                # gcloud OAuth token - use Authorization: Bearer header
+                headers['Authorization'] = f'Bearer {self.bearer_token}'
+            elif self.api_key:
+                # API key - use x-goog-api-key header
+                headers['x-goog-api-key'] = self.api_key
+            else:
+                return LLMResponse(
+                    model_name=self.model_name,
+                    content="",
+                    error="No authentication credentials available"
+                )
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     url,
-                    headers={
-                        'Content-Type': 'application/json',
-                        'x-goog-api-key': self.api_key
-                    },
+                    headers=headers,
                     json=payload
                 )
                 response.raise_for_status()

@@ -17,6 +17,7 @@ class OpenRouterAdapter(BaseLLMAdapter):
         self.client: Optional[AsyncOpenAI] = None
         self.api_key: Optional[str] = None
         self.model_id = config.get('model_id', 'openai/gpt-4-turbo')
+        self.base_url: Optional[str] = None  # Track which API we're using
         self.cli_session_manager = CLISessionManager()
         self.use_cli_auth = config.get('use_cli_auth', True)  # Default: try CLI first
 
@@ -46,8 +47,8 @@ class OpenRouterAdapter(BaseLLMAdapter):
             session = self.cli_session_manager.get_session(CLIProvider.CHATGPT)
             if session.is_authenticated and (session.api_key or session.token):
                 self.api_key = session.api_key or session.token
-                base_url = "https://api.openai.com/v1"
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+                self.base_url = "https://api.openai.com/v1"
+                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
                 self.auth_method_used = "CLI Session"
                 self.auth_source = "ChatGPT CLI (sgpt)"
                 print(f"✅ {self.model_name}: Authenticated via ChatGPT CLI")
@@ -57,8 +58,8 @@ class OpenRouterAdapter(BaseLLMAdapter):
             session = self.cli_session_manager.get_session(CLIProvider.OPENAI)
             if session.is_authenticated and session.api_key:
                 self.api_key = session.api_key
-                base_url = "https://api.openai.com/v1"
-                self.client = AsyncOpenAI(api_key=self.api_key, base_url=base_url)
+                self.base_url = "https://api.openai.com/v1"
+                self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.base_url)
                 self.auth_method_used = "CLI Session"
                 self.auth_source = "OpenAI CLI"
                 print(f"✅ {self.model_name}: Authenticated via OpenAI CLI")
@@ -82,16 +83,16 @@ class OpenRouterAdapter(BaseLLMAdapter):
 
         try:
             # OpenRouter uses OpenAI-compatible API
-            base_url = "https://openrouter.ai/api/v1"
+            self.base_url = "https://openrouter.ai/api/v1"
             auth_source = "OPENROUTER_API_KEY env var"
 
             if 'OPENAI_API_KEY' in os.environ and 'OPENROUTER_API_KEY' not in os.environ:
-                base_url = "https://api.openai.com/v1"
+                self.base_url = "https://api.openai.com/v1"
                 auth_source = "OPENAI_API_KEY env var"
 
             self.client = AsyncOpenAI(
                 api_key=self.api_key,
-                base_url=base_url
+                base_url=self.base_url
             )
             self.auth_method_used = "API Key"
             self.auth_source = auth_source
@@ -100,6 +101,27 @@ class OpenRouterAdapter(BaseLLMAdapter):
         except Exception as e:
             print(f"❌ {self.model_name}: Auth failed - {e}")
             return False
+
+    def _normalize_model_id(self) -> str:
+        """
+        Normalize model ID based on the base URL being used.
+
+        OpenRouter uses vendor-prefixed model IDs (e.g., "openai/gpt-4-turbo")
+        OpenAI API uses plain model names (e.g., "gpt-4-turbo")
+
+        Returns:
+            Normalized model ID for the current base URL
+        """
+        if self.base_url and "api.openai.com" in self.base_url:
+            # Using OpenAI API - strip vendor prefix
+            if '/' in self.model_id:
+                # Extract model name after the prefix (e.g., "openai/gpt-4-turbo" -> "gpt-4-turbo")
+                vendor, model = self.model_id.split('/', 1)
+                return model
+            return self.model_id
+        else:
+            # Using OpenRouter - keep vendor prefix
+            return self.model_id
 
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
         """Query OpenRouter model"""
@@ -114,8 +136,11 @@ class OpenRouterAdapter(BaseLLMAdapter):
         start_time = time.time()
 
         try:
+            # Normalize model ID based on which API we're using
+            model_id = self._normalize_model_id()
+
             completion = await self.client.chat.completions.create(
-                model=self.model_id,
+                model=model_id,
                 messages=[{
                     "role": "user",
                     "content": prompt
