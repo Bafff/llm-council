@@ -6,6 +6,7 @@ from typing import Optional
 import httpx
 
 from .base import BaseLLMAdapter, LLMResponse, AuthMethod
+from ..auth import CLISessionManager, CLIProvider
 
 
 class GeminiAdapter(BaseLLMAdapter):
@@ -17,21 +18,61 @@ class GeminiAdapter(BaseLLMAdapter):
         # Use latest Gemini 2.5 Flash (newest model as of 2025)
         self.model_id = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash')
         self.base_url = "https://generativelanguage.googleapis.com/v1beta/models"
+        self.cli_session_manager = CLISessionManager()
+        self.use_cli_auth = config.get('use_cli_auth', True)  # Default: try CLI first
 
-    def authenticate(self, method: AuthMethod = AuthMethod.API_KEY) -> bool:
-        """Authenticate with Gemini using REST API"""
+    def authenticate(self, method: AuthMethod = AuthMethod.CLI_SESSION) -> bool:
+        """
+        Authenticate with Gemini using CLI session or API key.
+
+        Tries CLI authentication first (if enabled), falls back to API key.
+        """
+        # Try CLI session authentication first (if enabled)
+        if self.use_cli_auth and method == AuthMethod.CLI_SESSION:
+            if self._authenticate_via_cli():
+                return True
+            # Fall back to API key if CLI auth fails
+            print(f"ℹ️  {self.model_name}: CLI auth unavailable, trying API key...")
+            method = AuthMethod.API_KEY
+
         if method == AuthMethod.API_KEY:
-            # Try environment variable
-            self.api_key = os.getenv('GOOGLE_API_KEY')
-
-            if not self.api_key:
-                print(f"⚠️  {self.model_name}: No API key found")
-                print("   Get FREE key at: https://ai.google.dev/")
-                return False
-
-            return True
+            return self._authenticate_via_api_key()
 
         return False
+
+    def _authenticate_via_cli(self) -> bool:
+        """Authenticate using Gemini/gcloud CLI session"""
+        try:
+            # Try Gemini CLI
+            session = self.cli_session_manager.get_session(CLIProvider.GEMINI)
+            if session.is_authenticated and session.api_key:
+                self.api_key = session.api_key
+                print(f"✅ {self.model_name}: Authenticated via Gemini CLI")
+                return True
+
+            # Try Google Cloud CLI (gcloud)
+            session = self.cli_session_manager.get_session(CLIProvider.GOOGLE_AI)
+            if session.is_authenticated and (session.token or session.api_key):
+                self.api_key = session.token or session.api_key
+                print(f"✅ {self.model_name}: Authenticated via gcloud CLI")
+                return True
+
+        except Exception as e:
+            print(f"⚠️  {self.model_name}: CLI auth failed - {e}")
+
+        return False
+
+    def _authenticate_via_api_key(self) -> bool:
+        """Authenticate using API key from environment"""
+        self.api_key = os.getenv('GOOGLE_API_KEY')
+
+        if not self.api_key:
+            print(f"⚠️  {self.model_name}: No API key found")
+            print("   Get FREE key at: https://ai.google.dev/")
+            return False
+
+        print(f"✅ {self.model_name}: Authenticated via API key")
+        return True
 
     async def query(self, prompt: str, **kwargs) -> LLMResponse:
         """Query Gemini using direct REST API"""

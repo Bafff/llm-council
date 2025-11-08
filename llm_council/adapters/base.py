@@ -8,10 +8,11 @@ from enum import Enum
 
 class AuthMethod(Enum):
     """Authentication methods"""
-    API_KEY = "api_key"
+    CLI_SESSION = "cli_session"  # Primary: Use CLI tool authentication
+    API_KEY = "api_key"  # Fallback: Use API keys
     BROWSER_COOKIES = "browser_cookies"
     OAUTH = "oauth"
-    CLAUDE_CODE_SESSION = "claude_code_session"
+    CLAUDE_CODE_SESSION = "claude_code_session"  # Legacy, use CLI_SESSION instead
 
 
 @dataclass
