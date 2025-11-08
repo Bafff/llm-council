@@ -25,9 +25,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if pipx list --short | grep -q "^llm-council"; then
     echo "🔁 LLM Council already installed via pipx – refreshing installation with --force"
-    pipx install -e "$SCRIPT_DIR/llm_council" --force
+    pipx install -e "$SCRIPT_DIR" --force
 else
-    pipx install -e "$SCRIPT_DIR/llm_council"
+    pipx install -e "$SCRIPT_DIR"
 fi
 
 echo ""

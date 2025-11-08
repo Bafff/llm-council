@@ -30,7 +30,7 @@ source ~/.bashrc  # или ~/.zshrc
 
 ```bash
 cd /home/user/claude-code-council
-pipx install -e ./llm_council
+pipx install -e .
 ```
 
 **Флаг `-e` (editable)**: изменения в коде сразу доступны без переустановки
@@ -129,7 +129,7 @@ export PATH="$HOME/.local/bin:$PATH"
 ```bash
 # Переустановите
 pipx uninstall llm_council
-pipx install -e /path/to/llm_council
+pipx install -e /path/to/llm-council
 ```
 
 ### Обновить после изменений

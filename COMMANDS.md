@@ -10,7 +10,7 @@ bash install.sh
 cd /home/user/claude-code-council
 python3 -m pip install --user pipx
 python3 -m pipx ensurepath
-pipx install -e ./llm_council
+pipx install -e .
 ```
 
 **После установки перезагрузите терминал или:**
@@ -186,7 +186,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ```bash
 pipx uninstall llm_council
-pipx install -e /home/user/claude-code-council/llm_council
+pipx install -e /home/user/claude-code-council
 ```
 
 ### Изменения не применяются
@@ -195,7 +195,7 @@ pipx install -e /home/user/claude-code-council/llm_council
 # Полная переустановка
 pipx uninstall llm_council
 cd /home/user/claude-code-council
-pipx install -e ./llm_council
+pipx install -e .
 ```
 
 ### "No models available"
@@ -265,7 +265,7 @@ llm-council ask "What's the best way to learn Rust?"
 
 1. **Editable mode** для разработки:
    ```bash
-   pipx install -e ./llm_council  # Изменения сразу работают!
+   pipx install -e .  # Изменения сразу работают!
    ```
 
 2. **Скрывайте индивидуальные ответы** для скорости:

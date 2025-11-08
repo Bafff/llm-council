@@ -121,7 +121,7 @@ MAJOR.MINOR.PATCH
 
 ```bash
 # Установить один раз
-pipx install -e /home/user/claude-code-council/llm_council
+pipx install -e /home/user/claude-code-council
 
 # Теперь изменения применяются АВТОМАТИЧЕСКИ!
 # Просто редактируйте код и запускайте:
@@ -206,7 +206,7 @@ llm-reload  # Быстрая переустановка!
 ```bash
 # Переустановить полностью
 pipx uninstall llm_council
-pipx install -e /home/user/claude-code-council/llm_council
+pipx install -e /home/user/claude-code-council
 ```
 
 ### "Command not found: llm-council"
@@ -225,7 +225,7 @@ pipx list | grep llm_council
 
 # Если нет "(editable)" - переустановите с -e
 pipx uninstall llm_council
-pipx install -e /home/user/claude-code-council/llm_council
+pipx install -e /home/user/claude-code-council
 ```
 
 ---

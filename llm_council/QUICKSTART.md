@@ -7,7 +7,7 @@
 python3 -m pip install --user pipx && python3 -m pipx ensurepath
 
 # 2. Установить LLM Council глобально
-pipx install -e /home/user/claude-code-council/llm_council
+pipx install -e /home/user/claude-code-council
 
 # 3. Использовать!
 llm-council ask "What is Docker?"
@@ -94,7 +94,7 @@ council ask "same as llm-council"
 cd /home/user/claude-code-council && \
   python3 -m pip install --user pipx 2>/dev/null || true && \
   python3 -m pipx ensurepath && \
-  pipx install -e ./llm_council && \
+  pipx install -e . && \
   llm-council version
 ```
 
@@ -139,7 +139,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ```bash
 # Editable mode - изменения применяются автоматически!
-pipx install -e /path/to/llm_council
+pipx install -e /path/to/llm-council
 
 # Теперь просто редактируйте код и запускайте:
 llm-council version  # Сразу видны изменения!
