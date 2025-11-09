@@ -156,3 +156,35 @@ def test_cli_ask_sample_request(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "Synthesized Answer" in result.stdout
+
+
+@pytest.mark.integration
+def test_cli_models_loads_env_file(tmp_path):
+    """The CLI should load a local .env file when no API keys are exported."""
+
+    env = _pythonpath_env()
+    for key in [
+        "ANTHROPIC_API_KEY",
+        "GOOGLE_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+    ]:
+        env.pop(key, None)
+
+    env_file = tmp_path / ".env"
+    env_file.write_text("OPENROUTER_API_KEY=dotenv-test-key\n")
+
+    config_path = tmp_path / "config.yaml"
+    _write_single_adapter_config(config_path, use_cli_auth=False)
+
+    result = subprocess.run(
+        [*CLI_MODULE, "models", "--config", str(config_path)],
+        cwd=tmp_path,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "Authenticated via API key" in result.stdout

@@ -18,6 +18,7 @@ from rich.console import Console
 from rich.table import Table
 
 from llm_council.core.council import LLMCouncil
+from llm_council.utils import load_environment
 
 app = typer.Typer(
     name="llm-council",
@@ -26,6 +27,9 @@ app = typer.Typer(
 )
 
 console = Console()
+
+# Load default environment variables at import time so adapters can authenticate.
+load_environment()
 
 
 @app.command()
@@ -50,6 +54,9 @@ def ask(
         llm-council ask "What is quantum computing?"
         llm-council ask "Should I use TypeScript or JavaScript?" --show-individual
     """
+
+    if config:
+        load_environment(config)
 
     async def run():
         council = LLMCouncil(config_path=str(config) if config else None)
@@ -80,6 +87,9 @@ def models(
     )
 ):
     """List all configured models and their status"""
+
+    if config:
+        load_environment(config)
 
     council = LLMCouncil(config_path=str(config) if config else None)
 
