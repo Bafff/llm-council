@@ -1,20 +1,16 @@
 """Integration tests for LLM Council"""
 
-import pytest
-import sys
-import os
-from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
 import asyncio
+import os
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add parent directories to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+import pytest
 
-from core.council import LLMCouncil
-from core.synthesizer import ConsensusLevel
-from adapters.base import LLMResponse
-from adapters.claude_adapter import ClaudeAdapter
-from adapters.gemini_adapter import GeminiAdapter
+from llm_council.adapters.base import LLMResponse
+from llm_council.adapters.claude_adapter import ClaudeAdapter
+from llm_council.adapters.gemini_adapter import GeminiAdapter
+from llm_council.core.council import LLMCouncil
+from llm_council.core.synthesizer import ConsensusLevel
 
 
 class TestLLMCouncilIntegration:

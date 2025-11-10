@@ -1,18 +1,13 @@
 """Unit tests for LLM Adapters"""
+import os
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-import sys
-import os
-from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
 
-# Add parent directories to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-
-from adapters.base import BaseLLMAdapter, AuthMethod, LLMResponse
-from adapters.claude_adapter import ClaudeAdapter
-from adapters.gemini_adapter import GeminiAdapter
-from adapters.openrouter_adapter import OpenRouterAdapter
+from llm_council.adapters.base import AuthMethod, BaseLLMAdapter, LLMResponse
+from llm_council.adapters.claude_adapter import ClaudeAdapter
+from llm_council.adapters.gemini_adapter import GeminiAdapter
+from llm_council.adapters.openrouter_adapter import OpenRouterAdapter
 
 
 class TestBaseLLMAdapter:
@@ -76,7 +71,7 @@ class TestClaudeAdapter:
 
         # Mock environment variable
         with patch.dict(os.environ, {'ANTHROPIC_API_KEY': 'test-key-123'}):
-            with patch('adapters.claude_adapter.AsyncAnthropic') as mock_anthropic:
+            with patch('llm_council.adapters.claude_adapter.AsyncAnthropic') as mock_anthropic:
                 result = adapter.authenticate()
                 assert result == True
                 assert adapter.api_key == 'test-key-123'
@@ -141,7 +136,7 @@ class TestGeminiAdapter:
         adapter = GeminiAdapter(mock_config['models']['gemini'])
 
         with patch.dict(os.environ, {'GOOGLE_API_KEY': 'test-gemini-key'}):
-            with patch('adapters.gemini_adapter.genai') as mock_genai:
+            with patch('llm_council.adapters.gemini_adapter.genai') as mock_genai:
                 mock_model = Mock()
                 mock_genai.GenerativeModel.return_value = mock_model
 
@@ -214,10 +209,10 @@ class TestOpenRouterAdapter:
         adapter = OpenRouterAdapter(mock_config['models']['gpt4'])
 
         with patch.dict(os.environ, {'OPENROUTER_API_KEY': 'test-or-key'}):
-            with patch('adapters.openrouter_adapter.AsyncOpenAI') as mock_openai:
+            with patch('llm_council.adapters.openrouter_adapter.AsyncOpenAI') as mock_openai:
                 result = adapter.authenticate()
 
-                assert result == True
+                assert result is True
                 assert adapter.api_key == 'test-or-key'
                 mock_openai.assert_called_once()
 

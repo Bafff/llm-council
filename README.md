@@ -40,6 +40,32 @@ llm-council models
 llm-council setup
 ```
 
+### 🔑 Authentication - NEW: CLI Session Support!
+
+**Use your existing CLI subscriptions instead of API keys!** Save costs by leveraging Claude Code CLI, ChatGPT CLI, and other tools you already have installed.
+
+**Automatic CLI Authentication:**
+```bash
+# No API keys needed if you have CLI tools installed and authenticated!
+# LLM Council will automatically use:
+# - Claude Code CLI session
+# - ChatGPT CLI (shell_gpt) session
+# - Gemini via gcloud CLI
+# - Falls back to API keys if CLI auth unavailable
+```
+
+**Supported CLI Tools:**
+- Claude Code CLI (`claude`)
+- Anthropic CLI (`anthropic`)
+- ChatGPT CLI (`chatgpt`, `sgpt`)
+- OpenAI CLI (`openai`)
+- Gemini CLI (`gemini`)
+- Google Cloud CLI (`gcloud`)
+
+**Priority:** CLI Session → API Keys (automatic fallback)
+
+See [CLI_AUTH.md](CLI_AUTH.md) for detailed setup and usage.
+
 ### 📚 Documentation
 
 - **[Main README](llm_council/README.md)** - Full documentation
