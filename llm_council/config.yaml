@@ -7,12 +7,14 @@ models:
     adapter: claude
     display_name: "Claude Sonnet 4.5"
     weight: 1.2  # Higher weight for consensus
+    use_cli_auth: true  # Try CLI authentication first
 
   gemini:
     enabled: true
     adapter: gemini
     display_name: "Gemini 2.5 Flash"
     weight: 1.0
+    use_cli_auth: true  # Try CLI authentication first
 
   gpt4:
     enabled: true
@@ -20,6 +22,7 @@ models:
     model_id: "openai/gpt-4-turbo"
     display_name: "GPT-4 Turbo"
     weight: 1.1
+    use_cli_auth: true  # Try CLI authentication first
 
   grok:
     enabled: true
@@ -27,23 +30,38 @@ models:
     model_id: "x-ai/grok-beta"
     display_name: "Grok Beta"
     weight: 1.0
+    use_cli_auth: true  # Try CLI authentication first
 
 # Authentication methods (prioritized top to bottom)
 auth:
-  # Method 1: Environment variables (recommended for MVP)
+  # Method 1: CLI Sessions (recommended - uses existing subscriptions!)
+  cli_sessions:
+    enabled: true  # Try CLI authentication first
+    providers:
+      - claude_code  # Claude Code CLI
+      - anthropic    # Anthropic CLI
+      - chatgpt      # ChatGPT CLI (shell_gpt, chatgpt-cli)
+      - openai       # OpenAI CLI
+      - gemini       # Gemini CLI
+      - gcloud       # Google Cloud CLI (gcloud)
+    # Session file locations (auto-detected by default)
+    auto_detect: true
+    cache_sessions: true  # Cache session data for performance
+
+  # Method 2: Environment variables (fallback)
   env_vars:
     anthropic_api_key: ANTHROPIC_API_KEY
     google_api_key: GOOGLE_API_KEY  # Free from ai.google.dev
     openrouter_api_key: OPENROUTER_API_KEY
     openai_api_key: OPENAI_API_KEY
 
-  # Method 2: Browser cookies (for free usage - to implement later)
+  # Method 3: Browser cookies (for free usage - to implement later)
   browser_cookies:
     enabled: false
     claude_cookie_file: ~/.config/llm-council/claude_cookies.json
     chatgpt_cookie_file: ~/.config/llm-council/openai_cookies.json
 
-  # Method 3: Claude Code session (advanced - to implement)
+  # Legacy: Claude Code session (use cli_sessions instead)
   claude_code_session:
     enabled: false
     use_active_session: true
